@@ -1,3 +1,7 @@
+
+Description: 
+A Netflix clone built using React. It fetches the data from TMDB (The Movie Database) API. Deployed with Firebase. If available, displays the movie trailers which is fetched from Youtube.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
