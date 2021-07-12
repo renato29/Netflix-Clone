@@ -1,25 +1,53 @@
-import React from 'react'
-import Row from './Row'
-import requests from "./requests";
-import Banner from './Banner';
-import Navbar from './Navbar'
+import React,{useEffect}from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import './App.css'
+import HomeScreen from './screens/HomeScreen'
+import LoginScreen from './screens/LoginScreen'
+import ProfileScreen from './screens/ProfileScreen'
+import { login, logout, selectUser } from './features/userSlices'
+import { auth } from './firebase';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+
 
 function App() {
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+  
 
+  useEffect(() => {
+    //esse useeffect vai salver no localstorage o user que ja fez login, e assim sera um "linstener"
+    const unsubscribe = auth.onAuthStateChanged((userAuth)=>{
+      if(userAuth) { 
+        dispatch(
+          login({ 
+          uid: userAuth.uid, 
+          email: userAuth.email }));
+      } else { 
+        //logged out
+        dispatch(logout())
+      }
+    })
+    return unsubscribe;
+    //para que nao duplique o user, e sim tire o anterior e adicione ao novo, como o cleanup de render.
+  }, [ dispatch ])
 
   return (
-    <div className="App">
-      <Navbar/>
-      <Banner/>
-      <Row title='NETFLIX ORIGINALS' fetchUrl={requests.fetchNetflixOriginals} isLargeRow={true} />
-      <Row title='TRENDING NOW' fetchUrl={requests.fetchTrending} />
-      <Row title='TOP RATED' fetchUrl={requests.fetchTopRated} />
-      <Row title='Action Movies' fetchUrl={requests.fetchActionMovies} />
-      <Row title='Comedy Movies' fetchUrl={requests.fetchComedyMovies} />
-      <Row title='Horror Movies' fetchUrl={requests.fetchHorrorMovies} />
-      <Row title='Romance Movies' fetchUrl={requests.fetchRomanceMovies} />
-      <Row title='Documentaries' fetchUrl={requests.fetchDocumentaries} />
+    <div className='app'>
+      <Router>
+        {!user? (<LoginScreen /> ) : ( <Switch>
+            <Route path='/profile'>
+              <ProfileScreen /> 
+            </Route>
+          <Route exact path="/">
+            <HomeScreen />
+          </Route>
+        </Switch>
+        )}
+      </Router>
     </div>
   );
 }
